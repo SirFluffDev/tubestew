@@ -1,5 +1,8 @@
+<img src="assets/logo.png" align="right" />
+
 # TubeStew
- An automatic content creation system.
+ An automatic content creation system.  
+ 
 
 ## Ultimate Goal  
 Run a youtube channel completely autonomously.

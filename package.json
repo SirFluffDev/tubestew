@@ -1,0 +1,19 @@
+{
+  "name": "tubestew",
+  "version": "1.0.0",
+  "description": "An automatic content generation system.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SirFluffDev/tubestew.git"
+  },
+  "author": "SirFluff",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SirFluffDev/tubestew/issues"
+  },
+  "homepage": "https://github.com/SirFluffDev/tubestew#readme"
+}
