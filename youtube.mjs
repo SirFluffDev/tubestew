@@ -28,7 +28,7 @@ export class Youtube {
         this.scopes = scopes;
     }
 
-    #get_new_token() {
+    get_new_token() {
         // Generate auth url
         const auth_url = this.oauth2_client.generateAuthUrl({
             access_type: 'offline',
@@ -86,8 +86,8 @@ export class Youtube {
         );
 
         // Check if we already have the user's token
-        let token_json = await fs.promises.readFile(this.youtube_dir + 'token.json')
-            .catch(this.#get_new_token); // Get a new one if we do not
+        let token_json = await fs.promises.readFile(this.youtube_dir + 'token.json').catch(() => {});
+        if (token_json === undefined) token_json = await this.get_new_token();
 
         // Parse token and get authorized scopes
         let token = JSON.parse(token_json);
@@ -98,7 +98,7 @@ export class Youtube {
             // If so, have the user re-authorize
             if (!token_scopes.includes(this.scopes[i])) {
                 console.log("New scopes have been added!")
-                token = JSON.parse(await this.#get_new_token());
+                token = JSON.parse(await this.get_new_token());
             }
         }
 
@@ -136,7 +136,17 @@ export class Youtube {
         )
     };
 
-    upload_video(path, title) {
+    /**
+     * Upload a video to your youtube channel
+     * @param {string} path - Path to the video file to upload
+     * 
+     * @param {object} info - Information regarding the youtube video
+     * @param {string} info.title - The title of the video
+     * @param {string} info.description - The description of the video
+     * 
+     * @returns {Promise}
+     */
+    upload_video(path, info) {
         if (!this.authorized) error("Youtube API is not authorized! Please call .authorize() before making any API calls.");
 
         return new Promise((resolve, reject) => {
@@ -147,8 +157,8 @@ export class Youtube {
                 part: 'snippet,status',
                 requestBody: {
                     snippet: {
-                        title,
-                        description: "Automatically uploaded by TubeStew",
+                        title: info.title,
+                        description: info.description,
                     },
                     status: {
                         privacyStatus: 'unlisted'
@@ -160,10 +170,9 @@ export class Youtube {
             }, (err, response) => {
                 if (err) throw err;
 
-                console.log(response.data);
                 console.log("Uploaded!");
-                
-            })
+                resolve(response.data); 
+            });
         });
     }
 }

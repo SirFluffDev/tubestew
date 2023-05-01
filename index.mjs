@@ -1,4 +1,5 @@
 import { Youtube } from "./youtube.mjs";
+import readline from 'readline';
 
 const SCOPES = [
     'https://www.googleapis.com/auth/youtube.readonly',
@@ -8,7 +9,24 @@ const SCOPES = [
 const youtube = new Youtube('./youtube/', SCOPES);
 await youtube.authorize();
 
-await youtube.upload_video('./video.mp4', "Amazing Joke Compilation (TEST)");
+console.log("");
 
-const channels = await youtube.get_channels('GoogleDevelopers');
-console.log(channels[0].snippet.title, 'has', channels[0].statistics.viewCount, 'views');
+let rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout
+});
+
+rl.question("Path to video file: ", (path) => {
+    rl.question("Video title: ", (video_title) => {
+        rl.question("Video description: ", (video_description) => {
+            console.log(path, video_title, video_description);
+
+            youtube.upload_video(path, {
+                title: video_title, 
+                description: video_description
+            });
+
+            rl.close();
+        });
+    });
+});
