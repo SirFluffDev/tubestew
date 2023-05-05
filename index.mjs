@@ -6,27 +6,14 @@ const SCOPES = [
     'https://www.googleapis.com/auth/youtube.upload',
 ];
 
-const youtube = new Youtube('./youtube/', SCOPES);
+const youtube = new Youtube(
+    './youtube/client_secret.json',
+    './youtube/api_key.json',
+    './youtube/user_token.json',
+    SCOPES
+);
+
 await youtube.authorize();
 
-console.log("");
-
-let rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
-});
-
-rl.question("Path to video file: ", (path) => {
-    rl.question("Video title: ", (video_title) => {
-        rl.question("Video description: ", (video_description) => {
-            console.log(path, video_title, video_description);
-
-            youtube.upload_video(path, {
-                title: video_title, 
-                description: video_description
-            });
-
-            rl.close();
-        });
-    });
-});
+const channels = await youtube.get_channels('GoogleDevelopers');
+console.log(channels[0].snippet.title);
