@@ -1,23 +1,23 @@
 {
   "name": "tubestew",
   "version": "1.0.0",
-  "description": "An automatic content generation system.",
+  "description": "Automatic content generation system",
   "main": "index.mjs",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/SirFluffDev/tubestew.git"
-  },
   "author": "SirFluff",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/SirFluffDev/tubestew/issues"
-  },
-  "homepage": "https://github.com/SirFluffDev/tubestew#readme",
   "dependencies": {
-    "google-auth-library": "^8.7.0",
-    "googleapis": "^118.0.0"
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffprobe-installer/ffprobe": "^2.0.0",
+    "bad-words": "^3.0.4",
+    "canvas": "^2.11.2",
+    "get-audio-duration": "^4.0.0",
+    "google-auth-library": "^8.8.0",
+    "googleapis": "^118.0.0",
+    "msedge-tts": "^1.1.4",
+    "puppeteer": "^20.7.1",
+    "sox-static": "^1.0.0"
   }
 }

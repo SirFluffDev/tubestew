@@ -1,4 +1,7 @@
-youtube
 node_modules
-video.mp4
-package-lock.json
+assets/*/*
+secret/*
+!*.md
+temp
+script.txt
+*.mp4

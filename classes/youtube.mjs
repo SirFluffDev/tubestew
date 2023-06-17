@@ -2,10 +2,34 @@ import fs from 'fs';
 import readline from 'readline';
 
 import { google } from 'googleapis';
+import { OAuth2Client } from 'google-auth-library';
 const OAuth2 = google.auth.OAuth2;
+
+export const VIDEO_CATEGORIES = {
+    "FILM_AND_ANIMATION": "1",
+    "AUTOS_AND_VEHICLES": "2",
+    "MUSIC": "10",
+    "PETS_AND_ANIMALS": "15",
+    "SPORTS": "17",
+    "TRAVEL_AND_EVENTS": "19",
+    "GAMING": "20",
+    "PEOPLE_AND_BLOGS": "22",
+    "COMEDY": "23",
+    "ENTERTAINMENT": "24",
+    "NEWS_AND_POLITICS": "25",
+    "HOWTO_AND_STYLE": "26",
+    "EDUCATION": "27",
+    "SCIENCE_AND_TECHNOLOGY": "28",
+    "NONPROFITS_AND_ACTIVISM": "29"
+}
+
+export const SCOPES = {
+    UPLOAD: 'https://www.googleapis.com/auth/youtube.upload',
+}
 
 /**
  * Simple abstraction over the Youtube API
+ * @property {string} client_secret_path
  */
 export class Youtube {
     authorized = false;
@@ -115,69 +139,59 @@ export class Youtube {
         this.authorized = true;
     }
 
-    get_channels(channel_name) {
+    async get_categories() {
         if (!this.authorized) throw "Youtube API is not authorized! Please call .authorize() before making any API calls.";
 
-        return new Promise((resolve, reject) => {
-            this.service.channels.list({
-                auth: this.oauth2_client,
-                part: 'snippet,contentDetails,statistics',
-                forUsername: channel_name
-            }, function (err, response) {
-                if (err) {
-                    console.log('The API returned an error: ' + err);
-                    reject("API returned error");
-                }
+        const res = await this.service.videoCategories.list({
+             auth: this.oauth2_client, 
 
-                const data = response.data;
+             part: 'snippet',
+             regionCode: 'US',
+        });
 
-                // No channel found
-                if (data.pageInfo.totalResults === 0) {
-                    console.log("No channels found");
-                    resolve([]);
-                }
-
-                resolve(response.data.items);
-            });
-        }
-        )
-    };
+        return res.data.items;
+    }
 
     /**
      * Upload a video to your youtube channel
      * @param {string} video_path - Path to the video file to upload
      * 
-     * @param {object} info - Information regarding the youtube video
-     * @param {string} info.title - The title of the video
-     * @param {string} info.description - The description of the video
+     * @param {object} video_data - Video information
+     * 
+     * @param {object} video_data.snippet
+     * @param {string} video_data.snippet.title - The title of the video
+     * @param {string} video_data.snippet.description - The description of the video
+     * @param {string} video_data.snippet.defaultLanguage - The language of the video
+     * @param {string} video_data.snippet.categoryId - The category of the video
+     * 
+     * @param {object} video_data.status
+     * @param {('public'|'unlisted'|'private')} video_data.status.privacyStatus - Privacy status of the video
+     * 
+     * @param {string} video_data.status.publishAt - 
+     * When to publish the video [(ISO 8601 format)](https://www.w3.org/TR/NOTE-datetime)
+     * Note that this only applies if `status.privacyStatus` is private.
+     * 
+     * @param {('youtube'|'creativeCommon')} video_data.status.license - The video's license
+     * @param {boolean} video_data.status.embeddable - Whether the video can be embedded on other sites or not
+     * @param {boolean} video_data.status.selfDeclaredMadeForKids - Whether the video is made for kids or not
      * 
      * @returns {Promise}
      */
-    upload_video(video_path, info) {
+    upload_video(video_path, video_data) {
         if (!this.authorized) throw "Youtube API is not authorized! Please call .authorize() before making any API calls.";
 
         return new Promise((resolve, reject) => {
-            console.log("Uploading", video_path);
-
             this.service.videos.insert({
                 auth: this.oauth2_client,
-                part: 'snippet,status',
-                requestBody: {
-                    snippet: {
-                        title: info.title,
-                        description: info.description,
-                    },
-                    status: {
-                        privacyStatus: 'unlisted'
-                    }
-                },
+                part: 'snippet,status,id',
+
+                requestBody: video_data,
+
                 media: {
                     body: fs.createReadStream(video_path)
                 }
             }, (err, response) => {
-                if (err) throw err;
-
-                console.log(`Uploaded`);
+                if (err) reject(err);
                 resolve(response.data);
             });
         });
